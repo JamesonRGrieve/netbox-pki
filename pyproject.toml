@@ -1,0 +1,37 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "netbox-pki"
+version = "0.0.1"
+description = "Native NetBox source of truth for PKI — certificate authorities, ACME accounts, and issued certificates"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "AGPL-3.0-or-later"
+authors = [{ name = "Jameson" }]
+keywords = ["netbox", "netbox-plugin", "pki", "acme", "certificate", "tls", "letsencrypt", "x509"]
+# PEP 639: the SPDX `license` expression above is authoritative; a `License ::`
+# classifier alongside it is rejected by setuptools>=77, so it is intentionally omitted.
+classifiers = [
+    "Framework :: Django",
+    "Programming Language :: Python :: 3",
+]
+# Composes netbox-services: Certificate.service_instance FKs its ServiceInstance (the cert the
+# service terminates TLS with). Hard dependency.
+dependencies = ["netbox-services"]
+
+[project.urls]
+Repository = "https://github.com/JamesonRGrieve/netbox-pki"
+
+[tool.setuptools.packages.find]
+include = ["netbox_pki*"]
+
+[tool.black]
+line-length = 100
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "netbox.settings"
+python_files = ["test_*.py"]
+addopts = "-v"
