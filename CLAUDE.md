@@ -12,7 +12,7 @@ vhosts and mail relays then **reference** a certificate's `cert_ref` to terminat
 verification owed.
 
 **It composes `netbox-services`, it does not re-model it (the netbox-ai pattern):** a certificate is
-(optionally) terminated by a running `netbox_services.ServiceInstance` — `Certificate` **FKs** it,
+(optionally) terminated by a running `netbox_services.ServiceInstance` — `PkiCertificate` **FKs** it,
 so `required_plugins = ["netbox_services"]` and the migration depends on
 `netbox_services.0001_initial`.
 
@@ -48,13 +48,13 @@ holds the structure; OpenBao holds the secret.
 - Skip a failing test; keep a broken path as a fallback; or re-implement a function in a second
   location to bypass the original. No bandaid fixes.
 - **Mock the database, the ORM, the NetBox API test client, or any integration path.** Tests run
-  against a **real test database** with real `CertificateAuthority` / `ACMEAccount` / `Certificate`
-  rows.
+  against a **real test database** with real `PkiCertificateAuthority` / `ACMEAccount` /
+  `PkiCertificate` rows.
 
 ### Python / Django Guidelines:
 - Import children of `datetime`: `from datetime import timedelta` — never `import datetime`.
-- Package-relative imports inside `netbox_pki` (`from .models import Certificate`); core/sibling use
-  the real path (`from netbox_services.api.serializers import ServiceInstanceSerializer`).
+- Package-relative imports inside `netbox_pki` (`from .models import PkiCertificate`); core/sibling
+  use the real path (`from netbox_services.api.serializers import ServiceInstanceSerializer`).
 - FKs to sibling models in `models.py` use **string labels** (`"netbox_services.ServiceInstance"`) —
   never import them there.
 - Models inherit `netbox.models.NetBoxModel` (custom fields, tags, journaling, GraphQL — free).
@@ -75,11 +75,14 @@ holds the structure; OpenBao holds the secret.
 | `graphql/__init__.py` | placeholder (auto GraphQL via `NetBoxModel`) |
 
 ### Model — authorities + accounts + certificates
-- **CertificateAuthority**: `name`(unique)·`ca_type`(acme/internal/external/self_signed)·
+Model classes are **`Pki`-prefixed** so their inherited `tags` reverse accessors don't clash with
+the co-installed `netbox_ssl` plugin's own `Certificate` / `CertificateAuthority` models (E304); the
+`verbose_name` UI labels and REST URL paths are unchanged.
+- **PkiCertificateAuthority** (UI "Certificate Authority"): `name`(unique)·`ca_type`(acme/internal/external/self_signed)·
   `acme_directory_url`·`contact_email`·`ca_cert_ref`(OpenBao path).
 - **ACMEAccount** (FK CA): `contact_email`·`account_key_ref`(OpenBao path)·`eab_kid`·
   `eab_hmac_ref`(OpenBao path)·`directory_url`; unique `(ca, contact_email)`.
-- **Certificate** (FK CA `PROTECT`; FK ACMEAccount; FK `netbox_services.ServiceInstance`):
+- **PkiCertificate** (UI "Certificate"; FK CA `PROTECT`; FK ACMEAccount; FK `netbox_services.ServiceInstance`):
   `common_name`·`sans`(ArrayField)·`key_algorithm`·`challenge_type`·`status`·`not_before`/
   `not_after`·`auto_renew`·`renew_before_days`·`key_ref`(OpenBao path)·`cert_ref`(OpenBao path);
   unique `(common_name, ca)`; `clean()` gates ACME CAs to require a same-CA account; **`is_expiring`

@@ -11,12 +11,12 @@ from django.test import TestCase
 from django.utils import timezone
 
 from netbox_pki.choices import CATypeChoices, CertStatusChoices, ChallengeTypeChoices, KeyAlgorithmChoices
-from netbox_pki.models import ACMEAccount, Certificate, CertificateAuthority
+from netbox_pki.models import ACMEAccount, PkiCertificate, PkiCertificateAuthority
 
 
 def make_ca(name="le", ca_type=CATypeChoices.ACME, **kw):
     kw.setdefault("acme_directory_url", "https://acme.example/directory" if ca_type == CATypeChoices.ACME else "")
-    return CertificateAuthority.objects.create(name=name, ca_type=ca_type, **kw)
+    return PkiCertificateAuthority.objects.create(name=name, ca_type=ca_type, **kw)
 
 
 def make_account(ca, email="admin@example.com"):
@@ -25,10 +25,10 @@ def make_account(ca, email="admin@example.com"):
 
 def make_cert(ca, name="www.example.com", account=None, **kw):
     kw.setdefault("key_ref", "pki/certs/www/key")
-    return Certificate.objects.create(common_name=name, ca=ca, acme_account=account, **kw)
+    return PkiCertificate.objects.create(common_name=name, ca=ca, acme_account=account, **kw)
 
 
-class CertificateAuthorityModelTest(TestCase):
+class PkiCertificateAuthorityModelTest(TestCase):
     def test_create_str_url_and_color(self):
         ca = make_ca("internal-ca", CATypeChoices.INTERNAL)
         self.assertEqual(str(ca), "internal-ca (internal)")
@@ -61,7 +61,7 @@ class ACMEAccountModelTest(TestCase):
         self.assertEqual(ACMEAccount.objects.filter(contact_email="shared@example.com").count(), 2)
 
 
-class CertificateModelTest(TestCase):
+class PkiCertificateModelTest(TestCase):
     def test_create_defaults_str_url_and_colors(self):
         ca = make_ca()
         acct = make_account(ca)
@@ -88,7 +88,7 @@ class CertificateModelTest(TestCase):
     def test_same_common_name_different_ca_allowed(self):
         make_cert(make_ca("ca-a", CATypeChoices.INTERNAL), "x.example.com")
         make_cert(make_ca("ca-b", CATypeChoices.INTERNAL), "x.example.com")
-        self.assertEqual(Certificate.objects.filter(common_name="x.example.com").count(), 2)
+        self.assertEqual(PkiCertificate.objects.filter(common_name="x.example.com").count(), 2)
 
     def test_is_expiring_flagged_status(self):
         cert = make_cert(make_ca("s", CATypeChoices.INTERNAL), status=CertStatusChoices.EXPIRING)
@@ -107,19 +107,19 @@ class CertificateModelTest(TestCase):
 
     def test_clean_acme_ca_requires_account(self):
         ca = make_ca()  # ACME
-        cert = Certificate(common_name="need.example.com", ca=ca, key_ref="pki/k")
+        cert = PkiCertificate(common_name="need.example.com", ca=ca, key_ref="pki/k")
         with self.assertRaises(ValidationError):
             cert.clean()
 
     def test_clean_account_must_match_ca(self):
         ca1, ca2 = make_ca("ca1"), make_ca("ca2")
         acct = make_account(ca2)
-        cert = Certificate(common_name="mismatch.example.com", ca=ca1, acme_account=acct, key_ref="pki/k")
+        cert = PkiCertificate(common_name="mismatch.example.com", ca=ca1, acme_account=acct, key_ref="pki/k")
         with self.assertRaises(ValidationError):
             cert.clean()
 
     def test_clean_internal_ca_no_account_ok(self):
-        cert = Certificate(common_name="ok.example.com", ca=make_ca("int", CATypeChoices.INTERNAL), key_ref="pki/k")
+        cert = PkiCertificate(common_name="ok.example.com", ca=make_ca("int", CATypeChoices.INTERNAL), key_ref="pki/k")
         cert.clean()  # no raise
 
     def test_ca_protect_on_delete_with_certs(self):

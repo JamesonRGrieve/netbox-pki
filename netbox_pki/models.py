@@ -1,9 +1,13 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
-"""Native PKI source-of-truth models. ``CertificateAuthority`` is the trust anchor (an ACME
+"""Native PKI source-of-truth models. ``PkiCertificateAuthority`` is the trust anchor (an ACME
 directory, an internal/external CA, or a self-signed root); ``ACMEAccount`` registers against an
-ACME CA; ``Certificate`` is an issued leaf certificate — its subject, SANs, key algorithm, validity
-window, renewal policy, and status — optionally linked to the ``netbox_services.ServiceInstance``
-that terminates TLS with it.
+ACME CA; ``PkiCertificate`` is an issued leaf certificate — its subject, SANs, key algorithm,
+validity window, renewal policy, and status — optionally linked to the
+``netbox_services.ServiceInstance`` that terminates TLS with it.
+
+The models are ``Pki``-prefixed (with clean ``verbose_name`` UI labels) so their inherited ``tags``
+reverse accessors do not collide with the pre-installed ``netbox_ssl`` plugin's own
+``Certificate`` / ``CertificateAuthority`` models (Django system check E304).
 
 FKs to sibling models use STRING labels ("netbox_services.ServiceInstance") — never import those
 into this module.
@@ -24,7 +28,7 @@ from netbox.models import NetBoxModel
 from .choices import CATypeChoices, CertStatusChoices, ChallengeTypeChoices, KeyAlgorithmChoices
 
 
-class CertificateAuthority(NetBoxModel):
+class PkiCertificateAuthority(NetBoxModel):
     """A certificate authority the estate trusts or issues from. For ``ca_type=acme`` the
     ``acme_directory_url`` names the directory endpoint (Let's Encrypt / ZeroSSL / an internal
     step-ca). ``ca_cert_ref`` is an OpenBao path to the CA chain — never the key material."""
@@ -48,19 +52,20 @@ class CertificateAuthority(NetBoxModel):
         return f"{self.name} ({self.ca_type})"
 
     def get_absolute_url(self):
-        return reverse("plugins:netbox_pki:certificateauthority", args=[self.pk])
+        return reverse("plugins:netbox_pki:pkicertificateauthority", args=[self.pk])
 
     def get_ca_type_color(self):
         return CATypeChoices.colors.get(self.ca_type)
 
 
 class ACMEAccount(NetBoxModel):
-    """A registered ACME account against an ACME :class:`CertificateAuthority`. ``account_key_ref``
-    is an OpenBao path to the account key (never the key value). ``eab_kid`` / ``eab_hmac_ref`` carry
-    External Account Binding for CAs that require it (e.g. ZeroSSL, an internal step-ca)."""
+    """A registered ACME account against an ACME :class:`PkiCertificateAuthority`.
+    ``account_key_ref`` is an OpenBao path to the account key (never the key value). ``eab_kid`` /
+    ``eab_hmac_ref`` carry External Account Binding for CAs that require it (e.g. ZeroSSL, an
+    internal step-ca)."""
 
     ca = models.ForeignKey(
-        CertificateAuthority, on_delete=models.CASCADE, related_name="acme_accounts"
+        PkiCertificateAuthority, on_delete=models.CASCADE, related_name="acme_accounts"
     )
     contact_email = models.EmailField()
     account_key_ref = models.CharField(
@@ -93,7 +98,7 @@ class ACMEAccount(NetBoxModel):
         return reverse("plugins:netbox_pki:acmeaccount", args=[self.pk])
 
 
-class Certificate(NetBoxModel):
+class PkiCertificate(NetBoxModel):
     """An issued leaf certificate. ``common_name`` + ``sans`` are the subject and subject-alt names;
     ``ca`` is the issuing authority (PROTECT — a CA with live certificates cannot be deleted out from
     under them); ``acme_account`` is the account used when the CA is ACME. ``key_algorithm`` /
@@ -107,7 +112,7 @@ class Certificate(NetBoxModel):
         help_text="Subject alternative names.",
     )
     ca = models.ForeignKey(
-        CertificateAuthority, on_delete=models.PROTECT, related_name="certificates"
+        PkiCertificateAuthority, on_delete=models.PROTECT, related_name="certificates"
     )
     acme_account = models.ForeignKey(
         ACMEAccount, on_delete=models.SET_NULL, null=True, blank=True, related_name="certificates"
@@ -153,7 +158,7 @@ class Certificate(NetBoxModel):
         return f"{self.common_name} [{self.ca.name}]"
 
     def get_absolute_url(self):
-        return reverse("plugins:netbox_pki:certificate", args=[self.pk])
+        return reverse("plugins:netbox_pki:pkicertificate", args=[self.pk])
 
     def get_status_color(self):
         return CertStatusChoices.colors.get(self.status)

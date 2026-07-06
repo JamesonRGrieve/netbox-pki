@@ -2,14 +2,14 @@
 from netbox.api.viewsets import NetBoxModelViewSet
 
 from .. import filtersets
-from ..models import ACMEAccount, Certificate, CertificateAuthority
-from .serializers import ACMEAccountSerializer, CertificateAuthoritySerializer, CertificateSerializer
+from ..models import ACMEAccount, PkiCertificate, PkiCertificateAuthority
+from .serializers import ACMEAccountSerializer, PkiCertificateAuthoritySerializer, PkiCertificateSerializer
 
 
-class CertificateAuthorityViewSet(NetBoxModelViewSet):
-    queryset = CertificateAuthority.objects.prefetch_related("tags")
-    serializer_class = CertificateAuthoritySerializer
-    filterset_class = filtersets.CertificateAuthorityFilterSet
+class PkiCertificateAuthorityViewSet(NetBoxModelViewSet):
+    queryset = PkiCertificateAuthority.objects.prefetch_related("tags")
+    serializer_class = PkiCertificateAuthoritySerializer
+    filterset_class = filtersets.PkiCertificateAuthorityFilterSet
 
 
 class ACMEAccountViewSet(NetBoxModelViewSet):
@@ -18,7 +18,7 @@ class ACMEAccountViewSet(NetBoxModelViewSet):
     filterset_class = filtersets.ACMEAccountFilterSet
 
 
-class CertificateViewSet(NetBoxModelViewSet):
-    queryset = Certificate.objects.prefetch_related("ca", "acme_account", "service_instance", "tags")
-    serializer_class = CertificateSerializer
-    filterset_class = filtersets.CertificateFilterSet
+class PkiCertificateViewSet(NetBoxModelViewSet):
+    queryset = PkiCertificate.objects.prefetch_related("ca", "acme_account", "service_instance", "tags")
+    serializer_class = PkiCertificateSerializer
+    filterset_class = filtersets.PkiCertificateFilterSet

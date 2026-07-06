@@ -19,13 +19,15 @@ def _routes(slug, name, model, list_view, edit_view, detail_view, delete_view, b
 
 
 urlpatterns = [
-    *_routes("certificate-authorities", "certificateauthority", models.CertificateAuthority,
-             views.CertificateAuthorityListView, views.CertificateAuthorityEditView, views.CertificateAuthorityView,
-             views.CertificateAuthorityDeleteView, views.CertificateAuthorityBulkDeleteView),
+    # URL slugs kept (certificate-authorities / certificates); route names follow the new model
+    # names (pkicertificateauthority / pkicertificate) so NetBox's model-derived viewnames resolve.
+    *_routes("certificate-authorities", "pkicertificateauthority", models.PkiCertificateAuthority,
+             views.PkiCertificateAuthorityListView, views.PkiCertificateAuthorityEditView, views.PkiCertificateAuthorityView,
+             views.PkiCertificateAuthorityDeleteView, views.PkiCertificateAuthorityBulkDeleteView),
     *_routes("acme-accounts", "acmeaccount", models.ACMEAccount,
              views.ACMEAccountListView, views.ACMEAccountEditView, views.ACMEAccountView,
              views.ACMEAccountDeleteView, views.ACMEAccountBulkDeleteView),
-    *_routes("certificates", "certificate", models.Certificate,
-             views.CertificateListView, views.CertificateEditView, views.CertificateView,
-             views.CertificateDeleteView, views.CertificateBulkDeleteView),
+    *_routes("certificates", "pkicertificate", models.PkiCertificate,
+             views.PkiCertificateListView, views.PkiCertificateEditView, views.PkiCertificateView,
+             views.PkiCertificateDeleteView, views.PkiCertificateBulkDeleteView),
 ]

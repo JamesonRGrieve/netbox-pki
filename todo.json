@@ -2,7 +2,7 @@
   "version": 1,
   "domain": "netbox.plugins.pki",
   "title": "netbox-pki plugin",
-  "description": "Native NetBox SoT for PKI — certificate authorities, ACME accounts, and issued certificates (subject/SANs, key algorithm, validity window, renewal policy, status). Composes netbox-services (Certificate FKs ServiceInstance). Standalone from netbox_ssl (a passive cert store) — no dependency, no duplication. Baseline scaffold + full spec is committed and py_compile-clean; the items below are the deep work owed against a live NetBox.",
+  "description": "Native NetBox SoT for PKI — certificate authorities, ACME accounts, and issued certificates (subject/SANs, key algorithm, validity window, renewal policy, status). Composes netbox-services (PkiCertificate FKs ServiceInstance). Standalone from netbox_ssl (a passive cert store); models are Pki-prefixed (PkiCertificateAuthority/PkiCertificate) to avoid a tags reverse-accessor clash with netbox_ssl (E304) — no dependency, no duplication. Baseline scaffold + full spec is committed and py_compile-clean; the items below are the deep work owed against a live NetBox.",
   "hierarchy": { "parent": null, "children": [] },
   "phases": [
     {
@@ -48,7 +48,7 @@
         {
           "number": "2.2",
           "feature": "Backfill from live PKI",
-          "description": "Populate CertificateAuthority + ACMEAccount + Certificate from the estate's real certificate authorities (Let's Encrypt / internal step-ca), the registered ACME accounts, and the currently-issued certificates (common_name, sans, validity window, status); credential_ref/*_ref pointing at the real OpenBao paths (never secret values).",
+          "description": "Populate PkiCertificateAuthority + ACMEAccount + PkiCertificate from the estate's real certificate authorities (Let's Encrypt / internal step-ca), the registered ACME accounts, and the currently-issued certificates (common_name, sans, validity window, status); credential_ref/*_ref pointing at the real OpenBao paths (never secret values).",
           "sot": "NB",
           "done": false
         }
@@ -62,21 +62,21 @@
         {
           "number": "3.1",
           "feature": "seed_netbox_pki.py",
-          "description": "Idempotent upsert seeder (the netbox-seeder pattern) for CertificateAuthority/ACMEAccount/Certificate; every *_ref pointing at OpenBao paths (never secret values).",
+          "description": "Idempotent upsert seeder (the netbox-seeder pattern) for PkiCertificateAuthority/ACMEAccount/PkiCertificate; every *_ref pointing at OpenBao paths (never secret values).",
           "sot": "NB",
           "done": false
         },
         {
           "number": "3.2",
           "feature": "Provider + consumer read path",
-          "description": "Wire the in-house ACME/issuance provider to read the REST contract for obtain/renew (account key from account_key_ref, key/fullchain written to key_ref/cert_ref in OpenBao, not_before/not_after/status stamped back), and wire web-server vhosts + mail relays to reference Certificate.cert_ref for TLS termination.",
+          "description": "Wire the in-house ACME/issuance provider to read the REST contract for obtain/renew (account key from account_key_ref, key/fullchain written to key_ref/cert_ref in OpenBao, not_before/not_after/status stamped back), and wire web-server vhosts + mail relays to reference PkiCertificate.cert_ref for TLS termination.",
           "sot": "NB",
           "done": false
         },
         {
           "number": "3.3",
           "feature": "netbox_ssl reconciliation (optional bridge)",
-          "description": "Evaluate an OPTIONAL, standalone-safe bridge between netbox-pki (issuance SoT) and netbox_ssl (passive cert store) — e.g. materializing an issued Certificate as a stored cert — as an optional dependency, never a hard cross-plugin coupling. Deferred / out of baseline scope.",
+          "description": "Evaluate an OPTIONAL, standalone-safe bridge between netbox-pki (issuance SoT) and netbox_ssl (passive cert store) — e.g. materializing an issued PkiCertificate as a stored cert — as an optional dependency, never a hard cross-plugin coupling. Deferred / out of baseline scope.",
           "sot": "NB",
           "done": false
         }

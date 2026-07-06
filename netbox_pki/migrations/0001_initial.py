@@ -1,8 +1,10 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Hand-authored initial migration (NetBox disables makemigrations in production). Verify with:
 #   python manage.py makemigrations netbox_pki --check --dry-run   (on a dev/ephemeral NetBox)
-# Re-confirm against the pinned NetBox 4.6: the Certificate.service_instance FK target
+# Re-confirm against the pinned NetBox 4.6: the PkiCertificate.service_instance FK target
 # (netbox_services.serviceinstance) and the ArrayField(sans) surface.
+# Models are Pki-prefixed to avoid a tags reverse-accessor clash with netbox_ssl (E304); the
+# netbox_pki_-prefixed constraint names are preserved.
 import django.contrib.postgres.fields
 import django.db.models.deletion
 import taggit.managers
@@ -23,12 +25,12 @@ class Migration(migrations.Migration):
     dependencies = [
         ("dcim", "0001_initial"),
         ("extras", "0001_initial"),
-        # Certificate.service_instance FKs netbox_services.ServiceInstance — its table must exist.
+        # PkiCertificate.service_instance FKs netbox_services.ServiceInstance — its table must exist.
         ("netbox_services", "0001_initial"),
     ]
     operations = [
         migrations.CreateModel(
-            name="CertificateAuthority",
+            name="PkiCertificateAuthority",
             fields=[
                 *_BASE,
                 ("name", models.CharField(max_length=100, unique=True)),
@@ -53,7 +55,7 @@ class Migration(migrations.Migration):
                 ("eab_kid", models.CharField(blank=True, max_length=255)),
                 ("eab_hmac_ref", models.CharField(blank=True, max_length=255)),
                 ("directory_url", models.URLField(blank=True)),
-                ("ca", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="acme_accounts", to="netbox_pki.certificateauthority")),
+                ("ca", models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="acme_accounts", to="netbox_pki.pkicertificateauthority")),
                 _TAGS,
             ],
             options={
@@ -63,7 +65,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name="Certificate",
+            name="PkiCertificate",
             fields=[
                 *_BASE,
                 ("common_name", models.CharField(max_length=255)),
@@ -77,7 +79,7 @@ class Migration(migrations.Migration):
                 ("renew_before_days", models.PositiveIntegerField(default=30)),
                 ("key_ref", models.CharField(max_length=255)),
                 ("cert_ref", models.CharField(blank=True, max_length=255)),
-                ("ca", models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name="certificates", to="netbox_pki.certificateauthority")),
+                ("ca", models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name="certificates", to="netbox_pki.pkicertificateauthority")),
                 ("acme_account", models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="certificates", to="netbox_pki.acmeaccount")),
                 ("service_instance", models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="certificates", to="netbox_services.serviceinstance")),
                 _TAGS,

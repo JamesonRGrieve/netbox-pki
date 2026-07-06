@@ -18,7 +18,7 @@ classifiers = [
     "Framework :: Django",
     "Programming Language :: Python :: 3",
 ]
-# Composes netbox-services: Certificate.service_instance FKs its ServiceInstance (the cert the
+# Composes netbox-services: PkiCertificate.service_instance FKs its ServiceInstance (the cert the
 # service terminates TLS with). Hard dependency.
 dependencies = ["netbox-services"]
 

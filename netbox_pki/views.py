@@ -4,29 +4,29 @@ from netbox.views import generic
 from . import filtersets, forms, models, tables
 
 
-class CertificateAuthorityView(generic.ObjectView):
-    queryset = models.CertificateAuthority.objects.all()
+class PkiCertificateAuthorityView(generic.ObjectView):
+    queryset = models.PkiCertificateAuthority.objects.all()
 
 
-class CertificateAuthorityListView(generic.ObjectListView):
-    queryset = models.CertificateAuthority.objects.all()
-    table = tables.CertificateAuthorityTable
-    filterset = filtersets.CertificateAuthorityFilterSet
-    filterset_form = forms.CertificateAuthorityFilterForm
+class PkiCertificateAuthorityListView(generic.ObjectListView):
+    queryset = models.PkiCertificateAuthority.objects.all()
+    table = tables.PkiCertificateAuthorityTable
+    filterset = filtersets.PkiCertificateAuthorityFilterSet
+    filterset_form = forms.PkiCertificateAuthorityFilterForm
 
 
-class CertificateAuthorityEditView(generic.ObjectEditView):
-    queryset = models.CertificateAuthority.objects.all()
-    form = forms.CertificateAuthorityForm
+class PkiCertificateAuthorityEditView(generic.ObjectEditView):
+    queryset = models.PkiCertificateAuthority.objects.all()
+    form = forms.PkiCertificateAuthorityForm
 
 
-class CertificateAuthorityDeleteView(generic.ObjectDeleteView):
-    queryset = models.CertificateAuthority.objects.all()
+class PkiCertificateAuthorityDeleteView(generic.ObjectDeleteView):
+    queryset = models.PkiCertificateAuthority.objects.all()
 
 
-class CertificateAuthorityBulkDeleteView(generic.BulkDeleteView):
-    queryset = models.CertificateAuthority.objects.all()
-    table = tables.CertificateAuthorityTable
+class PkiCertificateAuthorityBulkDeleteView(generic.BulkDeleteView):
+    queryset = models.PkiCertificateAuthority.objects.all()
+    table = tables.PkiCertificateAuthorityTable
 
 
 class ACMEAccountView(generic.ObjectView):
@@ -54,26 +54,26 @@ class ACMEAccountBulkDeleteView(generic.BulkDeleteView):
     table = tables.ACMEAccountTable
 
 
-class CertificateView(generic.ObjectView):
-    queryset = models.Certificate.objects.all()
+class PkiCertificateView(generic.ObjectView):
+    queryset = models.PkiCertificate.objects.all()
 
 
-class CertificateListView(generic.ObjectListView):
-    queryset = models.Certificate.objects.all()
-    table = tables.CertificateTable
-    filterset = filtersets.CertificateFilterSet
-    filterset_form = forms.CertificateFilterForm
+class PkiCertificateListView(generic.ObjectListView):
+    queryset = models.PkiCertificate.objects.all()
+    table = tables.PkiCertificateTable
+    filterset = filtersets.PkiCertificateFilterSet
+    filterset_form = forms.PkiCertificateFilterForm
 
 
-class CertificateEditView(generic.ObjectEditView):
-    queryset = models.Certificate.objects.all()
-    form = forms.CertificateForm
+class PkiCertificateEditView(generic.ObjectEditView):
+    queryset = models.PkiCertificate.objects.all()
+    form = forms.PkiCertificateForm
 
 
-class CertificateDeleteView(generic.ObjectDeleteView):
-    queryset = models.Certificate.objects.all()
+class PkiCertificateDeleteView(generic.ObjectDeleteView):
+    queryset = models.PkiCertificate.objects.all()
 
 
-class CertificateBulkDeleteView(generic.BulkDeleteView):
-    queryset = models.Certificate.objects.all()
-    table = tables.CertificateTable
+class PkiCertificateBulkDeleteView(generic.BulkDeleteView):
+    queryset = models.PkiCertificate.objects.all()
+    table = tables.PkiCertificateTable

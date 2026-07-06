@@ -5,7 +5,7 @@ from utilities.choices import ChoiceSet
 
 
 class CATypeChoices(ChoiceSet):
-    """Class of certificate authority a :class:`CertificateAuthority` represents. ``acme`` CAs carry
+    """Class of certificate authority a :class:`PkiCertificateAuthority` represents. ``acme`` CAs carry
     an ``acme_directory_url`` (Let's Encrypt / ZeroSSL / an internal step-ca); ``internal`` is a
     privately-run CA; ``external`` is a commercial/public CA outside our control; ``self_signed`` is
     an ad-hoc self-signed root."""
@@ -22,7 +22,7 @@ class CATypeChoices(ChoiceSet):
 
 
 class CertStatusChoices(ChoiceSet):
-    """Lifecycle status of an issued :class:`Certificate`."""
+    """Lifecycle status of an issued :class:`PkiCertificate`."""
     PENDING = "pending"
     ACTIVE = "active"
     EXPIRING = "expiring"

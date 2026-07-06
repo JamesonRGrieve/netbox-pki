@@ -4,17 +4,17 @@ from django.db.models import Q
 from netbox.filtersets import NetBoxModelFilterSet
 
 from .choices import CATypeChoices, CertStatusChoices, ChallengeTypeChoices, KeyAlgorithmChoices
-from .models import ACMEAccount, Certificate, CertificateAuthority
+from .models import ACMEAccount, PkiCertificate, PkiCertificateAuthority
 
 # Explicit FK filters: django-filter does NOT derive `<fk>_id` from a bare FK in Meta.fields, so
 # `?ca_id=` would be silently ignored. NetBox convention is `<fk>_id` (by PK) + `<fk>` (name).
 
 
-class CertificateAuthorityFilterSet(NetBoxModelFilterSet):
+class PkiCertificateAuthorityFilterSet(NetBoxModelFilterSet):
     ca_type = django_filters.MultipleChoiceFilter(choices=CATypeChoices)
 
     class Meta:
-        model = CertificateAuthority
+        model = PkiCertificateAuthority
         fields = ["id", "name", "acme_directory_url", "contact_email", "ca_cert_ref"]
 
     def search(self, queryset, name, value):
@@ -26,11 +26,11 @@ class CertificateAuthorityFilterSet(NetBoxModelFilterSet):
 
 class ACMEAccountFilterSet(NetBoxModelFilterSet):
     ca_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="ca", queryset=CertificateAuthority.objects.all(), label="CA (ID)"
+        field_name="ca", queryset=PkiCertificateAuthority.objects.all(), label="CA (ID)"
     )
     ca = django_filters.ModelMultipleChoiceFilter(
         field_name="ca__name", to_field_name="name",
-        queryset=CertificateAuthority.objects.all(), label="CA (name)",
+        queryset=PkiCertificateAuthority.objects.all(), label="CA (name)",
     )
 
     class Meta:
@@ -44,13 +44,13 @@ class ACMEAccountFilterSet(NetBoxModelFilterSet):
         )
 
 
-class CertificateFilterSet(NetBoxModelFilterSet):
+class PkiCertificateFilterSet(NetBoxModelFilterSet):
     ca_id = django_filters.ModelMultipleChoiceFilter(
-        field_name="ca", queryset=CertificateAuthority.objects.all(), label="CA (ID)"
+        field_name="ca", queryset=PkiCertificateAuthority.objects.all(), label="CA (ID)"
     )
     ca = django_filters.ModelMultipleChoiceFilter(
         field_name="ca__name", to_field_name="name",
-        queryset=CertificateAuthority.objects.all(), label="CA (name)",
+        queryset=PkiCertificateAuthority.objects.all(), label="CA (name)",
     )
     acme_account_id = django_filters.ModelMultipleChoiceFilter(
         field_name="acme_account", queryset=ACMEAccount.objects.all(), label="ACME account (ID)"
@@ -60,7 +60,7 @@ class CertificateFilterSet(NetBoxModelFilterSet):
     status = django_filters.MultipleChoiceFilter(choices=CertStatusChoices)
 
     class Meta:
-        model = Certificate
+        model = PkiCertificate
         fields = ["id", "common_name", "auto_renew", "renew_before_days", "key_ref", "cert_ref",
                   "service_instance_id"]
 

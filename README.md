@@ -19,7 +19,7 @@ vhosts and mail relays then **reference** a certificate's `cert_ref` to terminat
 ## Composes netbox-services
 
 A certificate is (optionally) terminated by a running `netbox_services.ServiceInstance`.
-`Certificate` FKs it, so `PluginConfig.required_plugins = ["netbox_services"]` and the migration
+`PkiCertificate` FKs it, so `PluginConfig.required_plugins = ["netbox_services"]` and the migration
 depends on `netbox_services.0001_initial`. This plugin references, it does not re-model (the
 `netbox-ai` pattern).
 
@@ -28,19 +28,22 @@ depends on `netbox_services.0001_initial`. This plugin references, it does not r
 A separate `netbox_ssl` plugin (a passive certificate *store*) exists on the lab NetBox.
 `netbox-pki` is the in-house **ACME/CA-issuance** source of truth and is deliberately standalone: it
 neither depends on nor duplicates `netbox_ssl`. A future integration may reconcile the two — see
-DESIGN.md.
+DESIGN.md. The model classes are **`Pki`-prefixed** (`PkiCertificateAuthority` / `PkiCertificate`)
+precisely so their inherited `tags` reverse accessors don't collide with `netbox_ssl`'s own
+`Certificate` / `CertificateAuthority` models (Django system check E304); their `verbose_name` UI
+labels stay "Certificate Authority" / "Certificate".
 
 ## Model
 
-- **CertificateAuthority** — `name`, `ca_type` (acme / internal / external / self_signed),
-  `acme_directory_url` (for ACME CAs), `contact_email`, `ca_cert_ref` (**OpenBao path** to the CA
-  chain).
+- **PkiCertificateAuthority** (UI: "Certificate Authority") — `name`, `ca_type` (acme / internal /
+  external / self_signed), `acme_directory_url` (for ACME CAs), `contact_email`, `ca_cert_ref`
+  (**OpenBao path** to the CA chain).
 - **ACMEAccount** (FK CA) — `contact_email`, `account_key_ref` (**OpenBao path**), `eab_kid` /
   `eab_hmac_ref` (External Account Binding), `directory_url`. Unique per `(ca, contact_email)`.
-- **Certificate** (FK CA `PROTECT`; FK ACMEAccount; FK `netbox_services.ServiceInstance`) —
-  `common_name`, `sans`, `key_algorithm`, `challenge_type`, `status`, `not_before` / `not_after`,
-  `auto_renew`, `renew_before_days`, `key_ref` / `cert_ref` (**OpenBao paths**). Unique per
-  `(common_name, ca)`. Exposes a computed `is_expiring` property.
+- **PkiCertificate** (UI: "Certificate"; FK CA `PROTECT`; FK ACMEAccount; FK
+  `netbox_services.ServiceInstance`) — `common_name`, `sans`, `key_algorithm`, `challenge_type`,
+  `status`, `not_before` / `not_after`, `auto_renew`, `renew_before_days`, `key_ref` / `cert_ref`
+  (**OpenBao paths**). Unique per `(common_name, ca)`. Exposes a computed `is_expiring` property.
 
 All models inherit `NetBoxModel` (custom fields, tags, change logging, GraphQL, REST API).
 

@@ -1,14 +1,14 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 """REST API CRUD tests against a real DB + real API client (no mocks).
 
-Composes the explicit CRUD mixins (no GraphQL type shipped yet). Certificate create rows use an
+Composes the explicit CRUD mixins (no GraphQL type shipped yet). PkiCertificate create rows use an
 INTERNAL CA (no ACME-account requirement) and distinct common names (unique per (common_name, ca));
 ACME-account rows use distinct emails on one CA (unique per (ca, contact_email)).
 """
 from utilities.testing import APIViewTestCases
 
 from netbox_pki.choices import CATypeChoices
-from netbox_pki.models import ACMEAccount, Certificate, CertificateAuthority
+from netbox_pki.models import ACMEAccount, PkiCertificate, PkiCertificateAuthority
 
 
 class _CRUD(
@@ -21,17 +21,17 @@ class _CRUD(
     pass
 
 
-class CertificateAuthorityAPITest(_CRUD):
-    model = CertificateAuthority
+class PkiCertificateAuthorityAPITest(_CRUD):
+    model = PkiCertificateAuthority
     brief_fields = ["ca_type", "display", "id", "name", "url"]
     bulk_update_data = {"contact_email": "ops@example.com"}
 
     @classmethod
     def setUpTestData(cls):
-        CertificateAuthority.objects.bulk_create([
-            CertificateAuthority(name="exist-a", ca_type="internal"),
-            CertificateAuthority(name="exist-b", ca_type="external"),
-            CertificateAuthority(name="exist-c", ca_type="self_signed"),
+        PkiCertificateAuthority.objects.bulk_create([
+            PkiCertificateAuthority(name="exist-a", ca_type="internal"),
+            PkiCertificateAuthority(name="exist-b", ca_type="external"),
+            PkiCertificateAuthority(name="exist-c", ca_type="self_signed"),
         ])
         cls.create_data = [
             {"name": "ca-a", "ca_type": "acme", "acme_directory_url": "https://acme.example/dir"},
@@ -47,7 +47,7 @@ class ACMEAccountAPITest(_CRUD):
 
     @classmethod
     def setUpTestData(cls):
-        ca = CertificateAuthority.objects.create(name="acme-ca", ca_type="acme",
+        ca = PkiCertificateAuthority.objects.create(name="acme-ca", ca_type="acme",
                                                  acme_directory_url="https://acme.example/dir")
         ACMEAccount.objects.bulk_create([
             ACMEAccount(ca=ca, contact_email=f"e{i}@example.com", account_key_ref=f"pki/acme/{i}")
@@ -60,16 +60,16 @@ class ACMEAccountAPITest(_CRUD):
         ]
 
 
-class CertificateAPITest(_CRUD):
-    model = Certificate
+class PkiCertificateAPITest(_CRUD):
+    model = PkiCertificate
     brief_fields = ["ca", "common_name", "display", "id", "status", "url"]
     bulk_update_data = {"auto_renew": False}
 
     @classmethod
     def setUpTestData(cls):
-        ca = CertificateAuthority.objects.create(name="cert-ca", ca_type=CATypeChoices.INTERNAL)
-        Certificate.objects.bulk_create([
-            Certificate(common_name=f"exist{i}.example.com", ca=ca, key_ref=f"pki/certs/{i}")
+        ca = PkiCertificateAuthority.objects.create(name="cert-ca", ca_type=CATypeChoices.INTERNAL)
+        PkiCertificate.objects.bulk_create([
+            PkiCertificate(common_name=f"exist{i}.example.com", ca=ca, key_ref=f"pki/certs/{i}")
             for i in range(3)
         ])
         cls.create_data = [

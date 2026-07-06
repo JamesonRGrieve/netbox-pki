@@ -3,14 +3,14 @@ from netbox.api.serializers import NetBoxModelSerializer
 from netbox_services.api.serializers import ServiceInstanceSerializer
 from rest_framework import serializers
 
-from ..models import ACMEAccount, Certificate, CertificateAuthority
+from ..models import ACMEAccount, PkiCertificate, PkiCertificateAuthority
 
 
-class CertificateAuthoritySerializer(NetBoxModelSerializer):
+class PkiCertificateAuthoritySerializer(NetBoxModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name="plugins-api:netbox_pki-api:certificateauthority-detail")
 
     class Meta:
-        model = CertificateAuthority
+        model = PkiCertificateAuthority
         fields = [
             "id", "url", "display", "name", "ca_type", "acme_directory_url", "contact_email",
             "ca_cert_ref", "tags", "custom_fields", "created", "last_updated",
@@ -20,7 +20,7 @@ class CertificateAuthoritySerializer(NetBoxModelSerializer):
 
 class ACMEAccountSerializer(NetBoxModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name="plugins-api:netbox_pki-api:acmeaccount-detail")
-    ca = CertificateAuthoritySerializer(nested=True)
+    ca = PkiCertificateAuthoritySerializer(nested=True)
 
     class Meta:
         model = ACMEAccount
@@ -31,15 +31,15 @@ class ACMEAccountSerializer(NetBoxModelSerializer):
         brief_fields = ["id", "url", "display", "ca", "contact_email"]
 
 
-class CertificateSerializer(NetBoxModelSerializer):
+class PkiCertificateSerializer(NetBoxModelSerializer):
     url = serializers.HyperlinkedIdentityField(view_name="plugins-api:netbox_pki-api:certificate-detail")
-    ca = CertificateAuthoritySerializer(nested=True)
+    ca = PkiCertificateAuthoritySerializer(nested=True)
     acme_account = ACMEAccountSerializer(nested=True, required=False, allow_null=True)
     service_instance = ServiceInstanceSerializer(nested=True, required=False, allow_null=True)
     is_expiring = serializers.BooleanField(read_only=True)
 
     class Meta:
-        model = Certificate
+        model = PkiCertificate
         fields = [
             "id", "url", "display", "common_name", "sans", "ca", "acme_account", "key_algorithm",
             "challenge_type", "status", "not_before", "not_after", "auto_renew", "renew_before_days",

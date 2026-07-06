@@ -15,9 +15,9 @@ def _item(model, label):
 menu = PluginMenu(
     label="PKI",
     groups=(
-        ("Certificate Authorities", (_item("certificateauthority", "Certificate Authorities"),)),
+        ("Certificate Authorities", (_item("pkicertificateauthority", "Certificate Authorities"),)),
         ("ACME Accounts", (_item("acmeaccount", "ACME Accounts"),)),
-        ("Certificates", (_item("certificate", "Certificates"),)),
+        ("Certificates", (_item("pkicertificate", "Certificates"),)),
     ),
     icon_class="mdi mdi-certificate",
 )

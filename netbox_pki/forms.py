@@ -5,22 +5,22 @@ from utilities.forms.fields import DynamicModelChoiceField, DynamicModelMultiple
 from utilities.forms.rendering import FieldSet
 
 from .choices import CATypeChoices, CertStatusChoices, ChallengeTypeChoices, KeyAlgorithmChoices
-from .models import ACMEAccount, Certificate, CertificateAuthority
+from .models import ACMEAccount, PkiCertificate, PkiCertificateAuthority
 
 
-class CertificateAuthorityForm(NetBoxModelForm):
+class PkiCertificateAuthorityForm(NetBoxModelForm):
     fieldsets = (
         FieldSet("name", "ca_type", "contact_email", name="Certificate Authority"),
         FieldSet("acme_directory_url", "ca_cert_ref", name="ACME / chain"),
     )
 
     class Meta:
-        model = CertificateAuthority
+        model = PkiCertificateAuthority
         fields = ["name", "ca_type", "acme_directory_url", "contact_email", "ca_cert_ref", "tags"]
 
 
 class ACMEAccountForm(NetBoxModelForm):
-    ca = DynamicModelChoiceField(queryset=CertificateAuthority.objects.all())
+    ca = DynamicModelChoiceField(queryset=PkiCertificateAuthority.objects.all())
 
     fieldsets = (
         FieldSet("ca", "contact_email", "account_key_ref", "directory_url", name="ACME Account"),
@@ -33,8 +33,8 @@ class ACMEAccountForm(NetBoxModelForm):
                   "directory_url", "tags"]
 
 
-class CertificateForm(NetBoxModelForm):
-    ca = DynamicModelChoiceField(queryset=CertificateAuthority.objects.all())
+class PkiCertificateForm(NetBoxModelForm):
+    ca = DynamicModelChoiceField(queryset=PkiCertificateAuthority.objects.all())
     acme_account = DynamicModelChoiceField(queryset=ACMEAccount.objects.all(), required=False)
 
     fieldsets = (
@@ -45,30 +45,30 @@ class CertificateForm(NetBoxModelForm):
     )
 
     class Meta:
-        model = Certificate
+        model = PkiCertificate
         fields = ["common_name", "sans", "ca", "acme_account", "key_algorithm", "challenge_type",
                   "status", "not_before", "not_after", "auto_renew", "renew_before_days",
                   "key_ref", "cert_ref", "service_instance", "tags"]
 
 
-class CertificateAuthorityFilterForm(NetBoxModelFilterSetForm):
-    model = CertificateAuthority
+class PkiCertificateAuthorityFilterForm(NetBoxModelFilterSetForm):
+    model = PkiCertificateAuthority
     ca_type = forms.MultipleChoiceField(choices=CATypeChoices, required=False)
-    tag = TagFilterField(CertificateAuthority)
+    tag = TagFilterField(PkiCertificateAuthority)
 
 
 class ACMEAccountFilterForm(NetBoxModelFilterSetForm):
     model = ACMEAccount
     ca_id = DynamicModelMultipleChoiceField(
-        queryset=CertificateAuthority.objects.all(), required=False, label="CA"
+        queryset=PkiCertificateAuthority.objects.all(), required=False, label="CA"
     )
     tag = TagFilterField(ACMEAccount)
 
 
-class CertificateFilterForm(NetBoxModelFilterSetForm):
-    model = Certificate
+class PkiCertificateFilterForm(NetBoxModelFilterSetForm):
+    model = PkiCertificate
     ca_id = DynamicModelMultipleChoiceField(
-        queryset=CertificateAuthority.objects.all(), required=False, label="CA"
+        queryset=PkiCertificateAuthority.objects.all(), required=False, label="CA"
     )
     acme_account_id = DynamicModelMultipleChoiceField(
         queryset=ACMEAccount.objects.all(), required=False, label="ACME account"
@@ -77,4 +77,4 @@ class CertificateFilterForm(NetBoxModelFilterSetForm):
     challenge_type = forms.MultipleChoiceField(choices=ChallengeTypeChoices, required=False)
     status = forms.MultipleChoiceField(choices=CertStatusChoices, required=False)
     auto_renew = forms.NullBooleanField(required=False)
-    tag = TagFilterField(Certificate)
+    tag = TagFilterField(PkiCertificate)
