@@ -5,6 +5,8 @@ Composes the explicit CRUD mixins (no GraphQL type shipped yet). PkiCertificate 
 INTERNAL CA (no ACME-account requirement) and distinct common names (unique per (common_name, ca));
 ACME-account rows use distinct emails on one CA (unique per (ca, contact_email)).
 """
+import unittest
+
 from utilities.testing import APIViewTestCases
 
 from netbox_pki.choices import CATypeChoices
@@ -18,7 +20,16 @@ class _CRUD(
     APIViewTestCases.UpdateObjectViewTestCase,
     APIViewTestCases.DeleteObjectViewTestCase,
 ):
-    pass
+    # Plugin API views register under the `plugins-api:<app_label>-api` namespace;
+    # without this override the test base reverses `<app_label>-api:…` (no
+    # `plugins-api` prefix) → NoReverseMatch. See utilities/testing/api.py.
+    view_namespace = "plugins-api:netbox_pki"
+
+    @classmethod
+    def setUpClass(cls):
+        if cls is _CRUD:
+            raise unittest.SkipTest("abstract API test base")
+        super().setUpClass()
 
 
 class PkiCertificateAuthorityAPITest(_CRUD):

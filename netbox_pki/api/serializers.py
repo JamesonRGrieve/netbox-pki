@@ -7,7 +7,7 @@ from ..models import ACMEAccount, PkiCertificate, PkiCertificateAuthority
 
 
 class PkiCertificateAuthoritySerializer(NetBoxModelSerializer):
-    url = serializers.HyperlinkedIdentityField(view_name="plugins-api:netbox_pki-api:certificateauthority-detail")
+    url = serializers.HyperlinkedIdentityField(view_name="plugins-api:netbox_pki-api:pkicertificateauthority-detail")
 
     class Meta:
         model = PkiCertificateAuthority
@@ -32,7 +32,7 @@ class ACMEAccountSerializer(NetBoxModelSerializer):
 
 
 class PkiCertificateSerializer(NetBoxModelSerializer):
-    url = serializers.HyperlinkedIdentityField(view_name="plugins-api:netbox_pki-api:certificate-detail")
+    url = serializers.HyperlinkedIdentityField(view_name="plugins-api:netbox_pki-api:pkicertificate-detail")
     ca = PkiCertificateAuthoritySerializer(nested=True)
     acme_account = ACMEAccountSerializer(nested=True, required=False, allow_null=True)
     service_instance = ServiceInstanceSerializer(nested=True, required=False, allow_null=True)

@@ -5,13 +5,14 @@ from . import views
 
 app_name = "netbox_pki"
 
-# URL path prefixes (and the derived DRF basenames / reverse names) are kept unchanged so the API
-# endpoints are stable; only the underlying Python classes/models are Pki-prefixed. Explicit
-# basenames pin the reverse names (certificateauthority-detail / certificate-detail) that the
-# serializers' HyperlinkedIdentityFields reference, decoupling them from the new model names.
+# The URL path prefixes below are the stable, client-facing API endpoints
+# (/certificate-authorities/, /acme-accounts/, /certificates/) — they come from the register()
+# prefix and are independent of the DRF basename. The basename derives the internal reverse name;
+# it is left to DRF's default (the model name, e.g. pkicertificate) so `{model_name}-detail` reverses
+# correctly (NetBox's API test base and the standard route lookup both assume that convention).
 router = NetBoxRouter()
-router.register("certificate-authorities", views.PkiCertificateAuthorityViewSet, basename="certificateauthority")
-router.register("acme-accounts", views.ACMEAccountViewSet, basename="acmeaccount")
-router.register("certificates", views.PkiCertificateViewSet, basename="certificate")
+router.register("certificate-authorities", views.PkiCertificateAuthorityViewSet)
+router.register("acme-accounts", views.ACMEAccountViewSet)
+router.register("certificates", views.PkiCertificateViewSet)
 
 urlpatterns = router.urls
