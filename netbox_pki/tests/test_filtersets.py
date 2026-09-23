@@ -15,7 +15,13 @@ class PkiCertificateAuthorityFilterSetTest(TestCase):
         cls.ca1 = PkiCertificateAuthority.objects.create(
             name="le", ca_type=CATypeChoices.ACME, acme_directory_url="https://acme.le/dir"
         )
-        cls.ca2 = PkiCertificateAuthority.objects.create(name="corp-root", ca_type=CATypeChoices.INTERNAL)
+        cls.ca2 = PkiCertificateAuthority.objects.create(
+            name="corp-root", ca_type=CATypeChoices.INTERNAL, trust_refid="0e2133fa11ca0"
+        )
+
+    def test_trust_refid(self):
+        qs = PkiCertificateAuthorityFilterSet({"trust_refid": ["0e2133fa11ca0"]}, self.queryset).qs
+        self.assertEqual(list(qs), [self.ca2])
 
     def test_ca_type(self):
         self.assertEqual(PkiCertificateAuthorityFilterSet({"ca_type": ["acme"]}, self.queryset).qs.count(), 1)

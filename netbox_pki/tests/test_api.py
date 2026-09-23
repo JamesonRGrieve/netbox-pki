@@ -47,7 +47,7 @@ class PkiCertificateAuthorityAPITest(_CRUD):
         cls.create_data = [
             {"name": "ca-a", "ca_type": "acme", "acme_directory_url": "https://acme.example/dir"},
             {"name": "ca-b", "ca_type": "internal", "contact_email": "pki@example.com"},
-            {"name": "ca-c", "ca_type": "external"},
+            {"name": "ca-c", "ca_type": "self_signed", "trust_refid": "0e2133fa11ca0"},
         ]
 
 

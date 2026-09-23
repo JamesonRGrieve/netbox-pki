@@ -11,12 +11,12 @@ from .models import ACMEAccount, PkiCertificate, PkiCertificateAuthority
 class PkiCertificateAuthorityForm(NetBoxModelForm):
     fieldsets = (
         FieldSet("name", "ca_type", "contact_email", name="Certificate Authority"),
-        FieldSet("acme_directory_url", "ca_cert_ref", name="ACME / chain"),
+        FieldSet("acme_directory_url", "ca_cert_ref", "trust_refid", name="ACME / chain"),
     )
 
     class Meta:
         model = PkiCertificateAuthority
-        fields = ["name", "ca_type", "acme_directory_url", "contact_email", "ca_cert_ref", "tags"]
+        fields = ["name", "ca_type", "acme_directory_url", "contact_email", "ca_cert_ref", "trust_refid", "tags"]
 
 
 class ACMEAccountForm(NetBoxModelForm):

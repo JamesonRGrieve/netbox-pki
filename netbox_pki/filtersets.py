@@ -15,7 +15,7 @@ class PkiCertificateAuthorityFilterSet(NetBoxModelFilterSet):
 
     class Meta:
         model = PkiCertificateAuthority
-        fields = ["id", "name", "acme_directory_url", "contact_email", "ca_cert_ref"]
+        fields = ["id", "name", "acme_directory_url", "contact_email", "ca_cert_ref", "trust_refid"]
 
     def search(self, queryset, name, value):
         return queryset.filter(

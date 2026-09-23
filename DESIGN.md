@@ -25,7 +25,7 @@ KV paths.
      │  name·ca_type·         │          │               │ ca (FK, PROTECT)
      │  acme_directory_url·   │  ┌────────┴────────┐      │
      │  contact_email·        │  │  PkiCertificate │──────┘
-     │  ca_cert_ref           │  │  common_name·   │
+     │  ca_cert_ref·trust_refid│  │  common_name·   │
      └─────────┬──────────────┘  │  sans·          │
        ca (FK)    │                │  key_algorithm· │
        CASCADE    ▼                │  challenge_type·│
@@ -45,7 +45,10 @@ KV paths.
 
 - **PkiCertificateAuthority** (UI label "Certificate Authority") is the trust anchor. `ca_type`
   selects its class; an `acme` CA carries an `acme_directory_url` (Let's Encrypt / ZeroSSL / an
-  internal step-ca). `ca_cert_ref` is an OpenBao path to the CA chain.
+  internal step-ca). `ca_cert_ref` is an OpenBao path to the CA chain. `trust_refid` is the fixed
+  id an appliance trust store keys the CA by (13-hex OPNsense refid, unique when non-blank), so a
+  consumer such as netbox-load-balancing-acl's `LBFrontendTuning.client_auth_cas` can reference the
+  CA on the device deterministically.
 - **ACMEAccount** registers a `contact_email` against a CA with an `account_key_ref` (OpenBao path).
   `eab_kid` / `eab_hmac_ref` carry External Account Binding for CAs that require it. Unique per
   `(ca, contact_email)`.

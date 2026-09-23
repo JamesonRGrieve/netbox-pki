@@ -19,6 +19,7 @@ OpenBao path references (the netbox-services convention); the key/secret value s
 from datetime import timedelta
 
 from django.core.exceptions import ValidationError
+from django.core.validators import RegexValidator
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.urls import reverse
@@ -42,11 +43,24 @@ class PkiCertificateAuthority(NetBoxModel):
     ca_cert_ref = models.CharField(
         max_length=255, blank=True, help_text="OpenBao path to the CA chain — NEVER the key."
     )
+    trust_refid = models.CharField(
+        max_length=13,
+        blank=True,
+        default="",
+        validators=[RegexValidator(r"^[0-9a-f]{13}$", "13 lowercase hex characters (OPNsense refid).")],
+        help_text="Fixed trust-store reference id an appliance keys this CA by (OPNsense refid), so a "
+        "frontend's client-auth CA list can reference it deterministically. Blank = not in a store.",
+    )
 
     class Meta:
         ordering = ["name"]
         verbose_name = "Certificate Authority"
         verbose_name_plural = "Certificate Authorities"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["trust_refid"], condition=~models.Q(trust_refid=""), name="netbox_pki_ca_unique_trust_refid"
+            ),
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.ca_type})"

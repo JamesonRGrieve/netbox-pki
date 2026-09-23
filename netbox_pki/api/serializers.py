@@ -13,7 +13,7 @@ class PkiCertificateAuthoritySerializer(NetBoxModelSerializer):
         model = PkiCertificateAuthority
         fields = [
             "id", "url", "display", "name", "ca_type", "acme_directory_url", "contact_email",
-            "ca_cert_ref", "tags", "custom_fields", "created", "last_updated",
+            "ca_cert_ref", "trust_refid", "tags", "custom_fields", "created", "last_updated",
         ]
         brief_fields = ["id", "url", "display", "name", "ca_type"]
 

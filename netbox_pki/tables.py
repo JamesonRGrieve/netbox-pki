@@ -13,7 +13,7 @@ class PkiCertificateAuthorityTable(NetBoxTable):
     class Meta(NetBoxTable.Meta):
         model = PkiCertificateAuthority
         fields = ("pk", "id", "name", "ca_type", "acme_directory_url", "contact_email",
-                  "ca_cert_ref", "tags", "created", "last_updated")
+                  "ca_cert_ref", "trust_refid", "tags", "created", "last_updated")
         default_columns = ("name", "ca_type", "acme_directory_url", "contact_email")
 
 

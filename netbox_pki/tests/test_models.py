@@ -40,6 +40,30 @@ class PkiCertificateAuthorityModelTest(TestCase):
         with self.assertRaises(IntegrityError), transaction.atomic():
             make_ca("dup", CATypeChoices.EXTERNAL)
 
+    def test_trust_refid_defaults_blank(self):
+        self.assertEqual(make_ca("no-store", CATypeChoices.INTERNAL).trust_refid, "")
+
+    def test_trust_refid_valid_value_saves(self):
+        ca = make_ca("stored", CATypeChoices.SELF_SIGNED, trust_refid="0e2133fa11ca0")
+        ca.full_clean()
+        self.assertEqual(PkiCertificateAuthority.objects.get(pk=ca.pk).trust_refid, "0e2133fa11ca0")
+
+    def test_trust_refid_rejects_non_refid(self):
+        for bad in ("0E2133FA11CA0", "0e2133fa11ca", "0e2133fa11ca00", "zz2133fa11ca0"):
+            ca = PkiCertificateAuthority(name=f"bad-{bad}", ca_type=CATypeChoices.INTERNAL, trust_refid=bad)
+            with self.assertRaises(ValidationError):
+                ca.full_clean()
+
+    def test_trust_refid_unique_when_set(self):
+        make_ca("first", CATypeChoices.INTERNAL, trust_refid="6a9ac549cc8d0")
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            make_ca("second", CATypeChoices.EXTERNAL, trust_refid="6a9ac549cc8d0")
+
+    def test_blank_trust_refid_not_unique(self):
+        make_ca("blank-a", CATypeChoices.INTERNAL)
+        make_ca("blank-b", CATypeChoices.EXTERNAL)
+        self.assertEqual(PkiCertificateAuthority.objects.filter(trust_refid="").count(), 2)
+
 
 class ACMEAccountModelTest(TestCase):
     def test_create_str_url_and_ref_is_path(self):

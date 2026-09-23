@@ -37,7 +37,8 @@ labels stay "Certificate Authority" / "Certificate".
 
 - **PkiCertificateAuthority** (UI: "Certificate Authority") — `name`, `ca_type` (acme / internal /
   external / self_signed), `acme_directory_url` (for ACME CAs), `contact_email`, `ca_cert_ref`
-  (**OpenBao path** to the CA chain).
+  (**OpenBao path** to the CA chain), `trust_refid` (the fixed appliance trust-store id, e.g. an
+  OPNsense refid a frontend's client-auth CA list references; unique when set).
 - **ACMEAccount** (FK CA) — `contact_email`, `account_key_ref` (**OpenBao path**), `eab_kid` /
   `eab_hmac_ref` (External Account Binding), `directory_url`. Unique per `(ca, contact_email)`.
 - **PkiCertificate** (UI: "Certificate"; FK CA `PROTECT`; FK ACMEAccount; FK
